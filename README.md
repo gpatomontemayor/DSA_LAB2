@@ -7,31 +7,31 @@ In this phase, we will continue leveraging Patient class (defined in phase 1), w
 fase2.py file contains Patient class implementation as well as a skeleton for HealthCenter2 class, which allows to represent the patients of a health center. Within this class, you need to implement the following features:
 
 • Function searchPatients, which receives the following parameters:
-o year: The function will look for all patients born in that year and the previous ones. Thus, if the parameter contains current year (2021), the function will retrieve all patients.
-o covid: Boolean whose default value is going to be None, indicating that the function needs to look for all patients regardless of whether they suffered covid or not. If it is set to True, the function will look for patients who have suffered covid, or those who have not otherwise.
-o vaccine: Its default value will be None, meaning that the function will search all patients, regardless of whether they have been vaccinated or not. If its value is 0, the function will look for patients who have received 0 doses. With a value of 1, it will bring patients vaccinated only once, and with a value of 2, patients who have received both vaccine doses.
+  o year: The function will look for all patients born in that year and the previous ones. Thus, if the parameter contains current year (2021), the function will retrieve all patients.
+  o covid: Boolean whose default value is going to be None, indicating that the function needs to look for all patients regardless of whether they suffered covid or not. If it is set to True, the function will look for patients who have suffered covid, or those who have not otherwise.
+  o vaccine: Its default value will be None, meaning that the function will search all patients, regardless of whether they have been vaccinated or not. If its value is 0, the function will look for patients who have received 0 doses. With a value of 1, it will bring patients vaccinated only once, and with a value of 2, patients who have received both vaccine doses.
 The function must visit all patients to check whether they meet the conditions specified by the function parameters or not. To access the patients, this function must apply a level order traversal. It is not allowed to use other types of traversals. The function will return a new object of type HealthCenter2, which only contains the patients who meet the specified input criteria, and that must be ordered alphabetically.
 
 • Function vaccine, which takes the following parameters:
-o name: name (surname, name) of a patient
-o vaccinated: object of type HealthCenter2, where the patients are stored alphabetically.
+  o name: name (surname, name) of a patient
+  o vaccinated: object of type HealthCenter2, where the patients are stored alphabetically.
 To emulate the vaccination process, the function needs to consider the following use cases:
-o If the patient does not exist in the invoking health center, the function shows a message saying that the patient does not exist. It also returns False.
-o If the patient exists in the invoking health centre, and had already received the two corresponding doses, the function displays a message informing that this patient had already been vaccinated previously. In addition, it removes the patient from the invoking health centre and stores him/her in the vaccinated health centre. The function returns False.
-o If the patient exists in the invoking health centre, and had only received one dose of vaccine, the function updates its number of doses to two, removing the patient from the invoking centre. Finally, the patient must be registered at the vaccinated health centre. The function returns True.
-o If the patient exists in the invoking health centre, and has not received any doses, the function simply updates the number of doses administered to the patient, if it existed. The function returns True.
+  o If the patient does not exist in the invoking health center, the function shows a message saying that the patient does not exist. It also returns False.
+  o If the patient exists in the invoking health centre, and had already received the two corresponding doses, the function displays a message informing that this patient had already been vaccinated previously. In addition, it removes the patient from the invoking health centre and stores him/her in the vaccinated health centre. The function returns False.
+  o If the patient exists in the invoking health centre, and had only received one dose of vaccine, the function updates its number of doses to two, removing the patient from the invoking centre. Finally, the patient must be registered at the vaccinated health centre. The function returns True.
+  o If the patient exists in the invoking health centre, and has not received any doses, the function simply updates the number of doses administered to the patient, if it existed. The function returns True.
 
 • Function makeAppointment will setup an appointment for a patient. This function receives the following arguments:
-o name: The name (surname, name) of a patient.
-o appointment: a string with forma “hh:mm” (for example, 08:00, 08:05, 09:55, 14:00, 18:30, 19:55, etc). To simplify the problem, we assume that the minutes of the appointment must be 00 or a multiple of 5. The vaccination times are from 08:00 to 19:55. To simplify the problem, we assume that all appointments are for the same day.
-o schedule: an object instante of HealthCenter2, containing all patients who have already an appointment. In this center, the patients should be sorted based on its appointment (string in format h:mm). As it was said above, all the appointments are defined for the same day.
+  o name: The name (surname, name) of a patient.
+  o appointment: a string with forma “hh:mm” (for example, 08:00, 08:05, 09:55, 14:00, 18:30, 19:55, etc). To simplify the problem, we assume that the minutes of the appointment must be 00 or a multiple of 5. The vaccination times are from 08:00 to 19:55. To simplify the problem, we assume that all appointments are for the same day.
+  o schedule: an object instante of HealthCenter2, containing all patients who have already an appointment. In this center, the patients should be sorted based on its appointment (string in format h:mm). As it was said above, all the appointments are defined for the same day.
 • To emulate the appointment creation for a patient, you need to consider the following use cases:
-o If the patient does not exist in the invoking health center, the appointment will not be created. The function shows a message saying that the patient does not exist and returns False.
-o If the patient exists and has already received both doses, the appointment will not be created. The function will show a message saying that the patient had already been vaccinated and returns False.
-o If the patient exists and has not received both doses, the appointment should be added into schedule. We should consider the following cases:
-▪ If the time is free, the patient (and its appointment) should be added to the schedule. The function returns True.
-▪ If the time is already filled, the function will look for the best time slot instead, that is, the most time-close slot. If there are two slots at the same distance (for example, five minutes before and five minutes later to the original appointment), the function will assign the earlier one (that is, five minutes before). Then, the patient and its appointment should be added to schedule. The function will also return True.
-▪ If there are no available slots, the function will print a message informing of it and will return False.
+  o If the patient does not exist in the invoking health center, the appointment will not be created. The function shows a message saying that the patient does not exist and returns False.
+  o If the patient exists and has already received both doses, the appointment will not be created. The function will show a message saying that the patient had already been vaccinated and returns False.
+  o If the patient exists and has not received both doses, the appointment should be added into schedule. We should consider the following cases:
+  ▪ If the time is free, the patient (and its appointment) should be added to the schedule. The function returns True.
+  ▪ If the time is already filled, the function will look for the best time slot instead, that is, the most time-close slot. If there are two slots at the same distance (for example, five minutes before and five minutes later to the original appointment), the function will assign the earlier one (that is, five minutes before). Then, the patient and its appointment should be added to schedule. The function will also return True.
+  ▪ If there are no available slots, the function will print a message informing of it and will return False.
 Note: The same patient is allowed to have several appointments in one day.
 
 Algorithms analysis:
