@@ -10,11 +10,13 @@ fase2.py file contains Patient class implementation as well as a skeleton for He
 - year: The function will look for all patients born in that year and the previous ones. Thus, if the parameter contains current year (2021), the function will retrieve all patients.
 - covid: Boolean whose default value is going to be None, indicating that the function needs to look for all patients regardless of whether they suffered covid or not. If it is set to True, the function will look for patients who have suffered covid, or those who have not otherwise.
 - vaccine: Its default value will be None, meaning that the function will search all patients, regardless of whether they have been vaccinated or not. If its value is 0, the function will look for patients who have received 0 doses. With a value of 1, it will bring patients vaccinated only once, and with a value of 2, patients who have received both vaccine doses.
+
 The function must visit all patients to check whether they meet the conditions specified by the function parameters or not. To access the patients, this function must apply a level order traversal. It is not allowed to use other types of traversals. The function will return a new object of type HealthCenter2, which only contains the patients who meet the specified input criteria, and that must be ordered alphabetically.
 
 • Function vaccine, which takes the following parameters:
 - name: name (surname, name) of a patient
 - vaccinated: object of type HealthCenter2, where the patients are stored alphabetically.
+
 To emulate the vaccination process, the function needs to consider the following use cases:
 - If the patient does not exist in the invoking health center, the function shows a message saying that the patient does not exist. It also returns False.
 - If the patient exists in the invoking health centre, and had already received the two corresponding doses, the function displays a message informing that this patient had already been vaccinated previously. In addition, it removes the patient from the invoking health centre and stores him/her in the vaccinated health centre. The function returns False.
@@ -25,7 +27,8 @@ To emulate the vaccination process, the function needs to consider the following
 - name: The name (surname, name) of a patient.
 - appointment: a string with forma “hh:mm” (for example, 08:00, 08:05, 09:55, 14:00, 18:30, 19:55, etc). To simplify the problem, we assume that the minutes of the appointment must be 00 or a multiple of 5. The vaccination times are from 08:00 to 19:55. To simplify the problem, we assume that all appointments are for the same day.
 - schedule: an object instante of HealthCenter2, containing all patients who have already an appointment. In this center, the patients should be sorted based on its appointment (string in format h:mm). As it was said above, all the appointments are defined for the same day.
-• To emulate the appointment creation for a patient, you need to consider the following use cases:
+
+To emulate the appointment creation for a patient, you need to consider the following use cases:
 - If the patient does not exist in the invoking health center, the appointment will not be created. The function shows a message saying that the patient does not exist and returns False.
 - If the patient exists and has already received both doses, the appointment will not be created. The function will show a message saying that the patient had already been vaccinated and returns False.
 - If the patient exists and has not received both doses, the appointment should be added into schedule. We should consider the following cases:
