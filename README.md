@@ -13,13 +13,13 @@ fase2.py file contains Patient class implementation as well as a skeleton for He
 The function must visit all patients to check whether they meet the conditions specified by the function parameters or not. To access the patients, this function must apply a level order traversal. It is not allowed to use other types of traversals. The function will return a new object of type HealthCenter2, which only contains the patients who meet the specified input criteria, and that must be ordered alphabetically.
 
 • Function vaccine, which takes the following parameters:
-  o name: name (surname, name) of a patient
-  o vaccinated: object of type HealthCenter2, where the patients are stored alphabetically.
+- name: name (surname, name) of a patient
+- vaccinated: object of type HealthCenter2, where the patients are stored alphabetically.
 To emulate the vaccination process, the function needs to consider the following use cases:
-  o If the patient does not exist in the invoking health center, the function shows a message saying that the patient does not exist. It also returns False.
-  o If the patient exists in the invoking health centre, and had already received the two corresponding doses, the function displays a message informing that this patient had already been vaccinated previously. In addition, it removes the patient from the invoking health centre and stores him/her in the vaccinated health centre. The function returns False.
-  o If the patient exists in the invoking health centre, and had only received one dose of vaccine, the function updates its number of doses to two, removing the patient from the invoking centre. Finally, the patient must be registered at the vaccinated health centre. The function returns True.
-  o If the patient exists in the invoking health centre, and has not received any doses, the function simply updates the number of doses administered to the patient, if it existed. The function returns True.
+- If the patient does not exist in the invoking health center, the function shows a message saying that the patient does not exist. It also returns False.
+- If the patient exists in the invoking health centre, and had already received the two corresponding doses, the function displays a message informing that this patient had already been vaccinated previously. In addition, it removes the patient from the invoking health centre and stores him/her in the vaccinated health centre. The function returns False.
+- If the patient exists in the invoking health centre, and had only received one dose of vaccine, the function updates its number of doses to two, removing the patient from the invoking centre. Finally, the patient must be registered at the vaccinated health centre. The function returns True.
+- If the patient exists in the invoking health centre, and has not received any doses, the function simply updates the number of doses administered to the patient, if it existed. The function returns True.
 
 • Function makeAppointment will setup an appointment for a patient. This function receives the following arguments:
 - name: The name (surname, name) of a patient.
