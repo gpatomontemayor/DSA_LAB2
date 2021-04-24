@@ -1,3 +1,3 @@
 1. searchPatient, qué pasa si calling está ordenado by time? Podemos utilizar queue?
 2. Se puede recibir dos dosis en un solo appointment (vaccine function)?
-3. makeAppointment, qué pasa si está ordenado by name el schedule? Hay que comprobar formato de la hora? 
+3. makeAppointment, qué pasa si está ordenado by name el schedule? Hay que comprobar formato de la hora? Hay que cambiar el appointment en los dos health centers o solo en schedule?

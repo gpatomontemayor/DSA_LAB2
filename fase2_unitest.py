@@ -383,7 +383,6 @@ class Test(unittest.TestCase):
         Test.mark+=0.75
         print('\ttest12_makeAppointment: was OK!!!')
         
-    """
     def test_13_makeAppointment(self):
         print('\n\ttest13_makeAppointment: patient not exist')
         
@@ -702,9 +701,7 @@ class Test(unittest.TestCase):
         print()
         Test.mark+=0.75
         print('\ttest22_makeAppointment: was OK!!!')
-
-
-    """        
+        
     def test_showmark(self):
         print('Total mark is ', Test.mark)
     

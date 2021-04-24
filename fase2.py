@@ -190,10 +190,9 @@ class HealthCenter2(BinarySearchTree):
           if checkFormatHour(time) is False: # check the format (hh:mm)
             print("Time format is not correct. Format: hh:mm")
             return False
-          patientHour = schedule.find(time)
-          if patientHour is None: # the slot is free, so assign it to the patient requesting it
-            newPat = Patient(name, patient.elem.year, patient.elem.covid, patient.elem.vaccine, appointment = time)
-            schedule.insert(time, newPat) # add it to the schedule BST
+          if schedule.search(time) is False: # the slot is free, so assign it to the patient requesting it
+            patient.elem.setAppointment(time)
+            schedule.insert(time, patient.elem) # add it to the schedule BST
             return True
           else:
             # the total number of possible time slots is 144, we check whether they are all occupied
@@ -201,21 +200,66 @@ class HealthCenter2(BinarySearchTree):
               print("{} cannot be appointed for a vaccine since there are no time slots".format(name))
               return False
             else:
+                print("ALREDAY SOMEONE WITH TIME SLOT {}, LOOKING FOR A BEST FIT".format(time))
                 # Transform the time variable from string to integer
-                hour = int(time[0:1])
-                minutes = int(time[3:4])
+
+                data = time.split(":")
+                hour = int(data[0])
+                minutes = int(data[1])
+
+                searchAfter = True
+                searchBefore = True
+
                 # Modify the variables to find the previous next 5 minutes
                 # taking into account the hour and minutes format
-                if minutes - 5 < 0:
+
+                if (minutes - 5) < 0:
                     prevTime = "{:02d}:{:02d}".format(hour - 1, 55)
                 else:
                     prevTime = "{:02d}:{:02d}".format(hour, minutes - 5)
-                if minutes + 5 > 55:
+                if (minutes + 5) > 55:
                     nextTime = "{:02d}:{:02d}".format(hour + 1, 0)
                 else:
-                    nextTime = "{:02d}:{:02d}".format(hour, minutes - 5)
+                    nextTime = "{:02d}:{:02d}".format(hour, minutes + 5)
                 
-                while(1):
+                while searchAfter or searchBefore:
+                    if checkFormatHour(prevTime) is False:
+                        searchBefore = False
+                    if checkFormatHour(nextTime) is False:
+                        searchAfter = False
+                    
+                    if searchBefore:
+                        if schedule.search(prevTime) is False:
+                            patient.elem.setAppointment(prevTime)
+                            schedule.insert(prevTime, patient.elem) # add it to the schedule BST
+                            print("Created appointment for {} at {}".format(name, prevTime))
+                            return True
+                        else:
+                            data = prevTime.split(":")
+                            hour = int(data[0])
+                            minutes = int(data[1])
+                            if (minutes - 5) < 0:
+                                prevTime = "{:02d}:{:02d}".format(hour - 1, 55)
+                            else:
+                                prevTime = "{:02d}:{:02d}".format(hour, minutes - 5)
+                    if searchAfter:
+                        if schedule.search(nextTime) is False:
+                            patient.elem.setAppointment(nextTime)
+                            schedule.insert(nextTime, patient.elem) # add it to the schedule BST
+                            print("Created appointment for {} at {}".format(name, nextTime))
+                            return True
+                        else:
+                            data = nextTime.split(":")
+                            hour = int(data[0])
+                            minutes = int(data[1])
+                            if (minutes + 5) > 55:
+                                nextTime = "{:02d}:{:02d}".format(hour + 1, 0)
+                            else:
+                                nextTime = "{:02d}:{:02d}".format(hour, minutes + 5)
+                print("Didn't add {} because schedule is full".format(name))
+                return False
+
+                """while(1):
                     # If that time slot is free, assign it to the patient and into the schedule BST
                     if (schedule.find(prevTime) is False) and (checkFormatHour(prevTime)):
                         newPat = Patient(name, patient.elem.year, patient.elem.covid, patient.elem.vaccine, appointment = prevTime)
@@ -244,13 +288,8 @@ class HealthCenter2(BinarySearchTree):
                     else:
                         nextTime = "{:02d}:{:02d}".format(nextHour, nextMinutes)
                 
-                print("There are no slots available")
-                return False
+                print("There are no slots available")"""
 
-
-              
-        
-        return None
     #ESTO NADA NO?
     def inorderlist(self):
         """returns the inorder (left, root, right)  traversal of the tree as a list"""
@@ -265,12 +304,7 @@ class HealthCenter2(BinarySearchTree):
             self._inorderlist(node.left, l)
             l.append(node.key)
             self._inorderlist(node.right, l)
-        return l            
-                
-
-
-                
-
+        return l
 
 if __name__ == '__main__':
     
@@ -278,9 +312,8 @@ if __name__ == '__main__':
     o=HealthCenter2('data/LosFrailes2.tsv')
     o.draw()
     print()
-    l = o.inorderlist()
-    print(str(l))
-    """print('Patients who were born in or before than 1990, had covid and did not get any vaccine')
+    
+    print('Patients who were born in or before than 1990, had covid and did not get any vaccine')
     result=o.searchPatients(1990, True,0)
     result.draw()
     print()
@@ -300,18 +333,14 @@ if __name__ == '__main__':
     result.draw()
     print()
 
-    """
     ###Testing the constructor. Creating a health center where patients are sorted by name
     schedule=HealthCenter2('data/LosFrailesCitas.tsv',False)
-    schedule.draw(False)
+    schedule.draw()
     print()
-    l2 = schedule.inorderlist()
-    print(str(l2))
     
-    """
     o.makeAppointment("Perez","08:00",schedule)
     o.makeAppointment("Losada","19:55",schedule)
-    o.makeAppointment("Jaen","16:00",schedule)
+    """o.makeAppointment("Jaen","16:00",schedule)
     o.makeAppointment("Perez","16:00",schedule)
     o.makeAppointment("Jaen","16:00",schedule)
 
@@ -319,12 +348,12 @@ if __name__ == '__main__':
     o.makeAppointment("Jaen","08:00",schedule)
 
     o.makeAppointment("Abad","08:00",schedule)
-    o.makeAppointment("Omar","15:45",schedule)
+    o.makeAppointment("Omar","15:45",schedule)"""
     
     
-    schedule.draw(False)
+    schedule.draw()
 
-    vaccinated=HealthCenter2('data/vaccinated.tsv')
+    """vaccinated=HealthCenter2('data/vaccinated.tsv')
     vaccinated.draw(False)
 
     name='Ainoza'  #doest no exist
