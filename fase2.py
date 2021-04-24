@@ -190,10 +190,9 @@ class HealthCenter2(BinarySearchTree):
           if checkFormatHour(time) is False: # check the format (hh:mm)
             print("Time format is not correct. Format: hh:mm")
             return False
-          patientHour = schedule.find(time)
-          if patientHour is None: # the slot is free, so assign it to the patient requesting it
-            newPat = Patient(name, patient.elem.year, patient.elem.covid, patient.elem.vaccine, appointment = time)
-            schedule.insert(time, newPat) # add it to the schedule BST
+          if schedule.search(time) is False: # the slot is free, so assign it to the patient requesting it
+            patient.elem.setAppointment(time)
+            schedule.insert(time, patient.elem) # add it to the schedule BST
             return True
           else:
             # the total number of possible time slots is 144, we check whether they are all occupied
@@ -201,7 +200,6 @@ class HealthCenter2(BinarySearchTree):
               print("{} cannot be appointed for a vaccine since there are no time slots".format(name))
               return False
             else:
-                newPat = Patient(name, patient.elem.year, patient.elem.covid, patient.elem.vaccine)
                 print("ALREDAY SOMEONE WITH TIME SLOT {}, LOOKING FOR A BEST FIT".format(time))
                 # Transform the time variable from string to integer
 
@@ -232,8 +230,8 @@ class HealthCenter2(BinarySearchTree):
                     
                     if searchBefore:
                         if schedule.search(prevTime) is False:
-                            newPat.setAppointment(prevTime)
-                            schedule.insert(prevTime, newPat)
+                            patient.elem.setAppointment(prevTime)
+                            schedule.insert(prevTime, patient.elem) # add it to the schedule BST
                             print("Created appointment for {} at {}".format(name, prevTime))
                             return True
                         else:
@@ -246,8 +244,8 @@ class HealthCenter2(BinarySearchTree):
                                 prevTime = "{:02d}:{:02d}".format(hour, minutes - 5)
                     if searchAfter:
                         if schedule.search(nextTime) is False:
-                            newPat.setAppointment(nextTime)
-                            schedule.insert(nextTime, newPat)
+                            patient.elem.setAppointment(nextTime)
+                            schedule.insert(nextTime, patient.elem) # add it to the schedule BST
                             print("Created appointment for {} at {}".format(name, nextTime))
                             return True
                         else:
