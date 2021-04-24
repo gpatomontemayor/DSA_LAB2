@@ -141,11 +141,11 @@ class HealthCenter2(BinarySearchTree):
             while not(q.empty()):  # n
                 current = q.get()  # dequeue
                 if current.elem.year <= year and (current.elem.covid == covid or covid is None) and (current.elem.vaccine == vaccine or vaccine is None):
-                    result.insert(current.elem.name, current.elem)  # logn
+                    result.insert(current.elem.name, current.elem)  # log(n) function
                 if current.left is not None:
-                    q.put(current.left)
+                    q.put(current.left) # enqueue the left element to check in the next iteration
                 if current.right is not None:
-                    q.put(current.right)
+                    q.put(current.right) # enqueue the right element to check in the next iteration
     
         return result
             
@@ -154,20 +154,20 @@ class HealthCenter2(BinarySearchTree):
     def vaccine(self,name,vaccinated):
         """This functions simulates the vaccination of a patient whose
         name is name. It returns True is the patient is vaccinated and False eoc"""
-        patient = self.find(name)
+        patient = self.find(name) # save the patient; found by their key (name)
         if patient is None:
           print("{} does not exist in the calling health center".format(name))
           return False
-        elif patient.elem.vaccine == 2:
+        elif patient.elem.vaccine == 2: 
           print("{} has already received two vaccines" .format(name))
-          self.remove(name)
+          self.remove(name) # patient is fully vaccinated so, eliminate it from HealthCenter
           newPat = Patient(name, patient.elem.year, patient.elem.covid, 2)
-          vaccinated.insert(name, newPat)
+          vaccinated.insert(name, newPat) # and add it to the vaccinated health center
           return False
         elif patient.elem.vaccine == 1:
-          self.remove(name)
+          self.remove(name) # after vaccinated, the patient would have the 2 doses
           newPat = Patient(name, patient.elem.year, patient.elem.covid, 2)
-          vaccinated.insert(name, newPat)
+          vaccinated.insert(name, newPat) # so add them to the vaccinated health center
           return True
         else:
           #IMPOIRTANT: Clarify if the patient can recieve both doses at once
@@ -179,6 +179,7 @@ class HealthCenter2(BinarySearchTree):
         for the patient whose name is name. It functions returns True is the appointment 
         is created and False eoc """
         patient = self.find(name)
+        # We first check the error cases (no patient and already vaccinated patient)
         if patient is None:
           print("{} does not exist in the calling health center".format(name))
           return False
@@ -186,21 +187,25 @@ class HealthCenter2(BinarySearchTree):
           print("{} has already received two vaccines" .format(name))
           return False
         else:
-          if checkFormatHour(time) is False:
+          if checkFormatHour(time) is False: # check the format (hh:mm)
             print("Time format is not correct. Format: hh:mm")
             return False
           patientHour = schedule.find(time)
-          if patientHour is None:
+          if patientHour is None: # the slot is free, so assign it to the patient requesting it
             newPat = Patient(name, patient.elem.year, patient.elem.covid, patient.elem.vaccine, appointment = time)
-            schedule.insert(time, newPat)
+            schedule.insert(time, newPat) # add it to the schedule BST
             return True
           else:
+            # the total number of possible time slots is 144, we check whether they are all occupied
             if schedule.size() == 144:
               print("{} cannot be appointed for a vaccine since there are no time slots".format(name))
               return False
             else:
+                # Transform the time variable from string to integer
                 hour = int(time[0:1])
                 minutes = int(time[3:4])
+                # Modify the variables to find the previous next 5 minutes
+                # taking into account the hour and minutes format
                 if minutes - 5 < 0:
                     prevTime = "{:02d}:{:02d}".format(hour - 1, 55)
                 else:
@@ -210,24 +215,43 @@ class HealthCenter2(BinarySearchTree):
                 else:
                     nextTime = "{:02d}:{:02d}".format(hour, minutes - 5)
                 
-              while(True):
-                if schedule.find(prevTime) is False:
-                  newPat = Patient(name, patient.elem.year, patient.elem.covid, patient.elem.vaccine, appointment = prevTime)
-                  schedule.insert(prevTime, newPat)
-
-                hour = int(time[0:1])
-                minutes = int(time[3:4])
-                minutes -= 5
-                if minutes == -5:
-                  prevtime = "{:02d}:{:02d}".format(hour - 1, 55)
-                else:
-                  prevtime = "{:02d}:{:02d}".format(hour, minutes)
+                while(1):
+                    # If that time slot is free, assign it to the patient and into the schedule BST
+                    if (schedule.find(prevTime) is False) and (checkFormatHour(prevTime)):
+                        newPat = Patient(name, patient.elem.year, patient.elem.covid, patient.elem.vaccine, appointment = prevTime)
+                        schedule.insert(prevTime, newPat)
+                        return True
+                    # If that slot is already taken, then set the time to search to 5 minutes before
+                    # for the next iteration
+                    prevHour = int(prevTime[0:1])
+                    prevMinutes = int(prevTime[3:4])
+                    prevMinutes -= 5
+                    if minutes == -5:
+                        prevTime = "{:02d}:{:02d}".format(prevHour - 1, 55)
+                    else:
+                        prevTime = "{:02d}:{:02d}".format(prevHour, prevMinutes)
+                    # Now look for the slot 5 minutes after
+                    if (schedule.find(nextTime) is False) and (checkFormatHour(nextTime)):
+                        newPat = Patient(name, patient.elem.year, patient.elem.covid, patient.elem.vaccine, appointment = nextTime)
+                        schedule.insert(nextTime, newPat)
+                        return True
+                    # And now prepare the time slot for the next iteration but 5 minutes after
+                    nextHour = int(nextTime[0:1])
+                    nextMinutes = int(nextTime[3:4])
+                    nextMinutes += 5
+                    if minutes > 55:
+                        nextTime = "{:02d}:{:02d}".format(nextHour + 1, 0)
+                    else:
+                        nextTime = "{:02d}:{:02d}".format(nextHour, nextMinutes)
+                
+                print("There are no slots available")
+                return False
 
 
               
         
         return None
-
+    #ESTO NADA NO?
     def inorderlist(self):
         """returns the inorder (left, root, right)  traversal of the tree as a list"""
         l = list()
