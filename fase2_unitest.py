@@ -212,7 +212,7 @@ class Test(unittest.TestCase):
         print()
         Test.mark+=0.25
         print('\ttest8_searchPatients: was OK!!!')
-    """            
+                
     def test9_vaccine(self):
         print('\n\ttest9_vaccine: patient does not exist')
         
@@ -383,7 +383,7 @@ class Test(unittest.TestCase):
         Test.mark+=0.75
         print('\ttest12_makeAppointment: was OK!!!')
         
-
+    """
     def test_13_makeAppointment(self):
         print('\n\ttest13_makeAppointment: patient not exist')
         

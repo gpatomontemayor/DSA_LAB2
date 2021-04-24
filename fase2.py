@@ -127,22 +127,24 @@ class HealthCenter2(BinarySearchTree):
         The function has to visit all patients, so the search must follow a level traverse of the tree.
         If you use a inorder traverse, the resulting tree should be a list!!!"""
         
+        # Complexity O(nlogn)
+
         result=HealthCenter2()
         
         if self._root is None:
             print('tree is empty')
         else:
             
-            q=queue.Queue()
-            q.put(self._root) #enqueue: we save the root
+            q = queue.Queue()
+            q.put(self._root) # enqueue: we save the root
             
-            while q.empty()==False:
-                current=q.get() #dequeue
-                if current.elem.year <= year and (current.elem.covid == covid or covid == None) and (current.elem.vaccine == vaccine or vaccine == None):
-                    result.insert(current.elem.name, current.elem)
-                if current.left!=None:
+            while not(q.empty()):  # n
+                current = q.get()  # dequeue
+                if current.elem.year <= year and (current.elem.covid == covid or covid is None) and (current.elem.vaccine == vaccine or vaccine is None):
+                    result.insert(current.elem.name, current.elem)  # logn
+                if current.left is not None:
                     q.put(current.left)
-                if current.right!=None:
+                if current.right is not None:
                     q.put(current.right)
     
         return result
@@ -152,8 +154,24 @@ class HealthCenter2(BinarySearchTree):
     def vaccine(self,name,vaccinated):
         """This functions simulates the vaccination of a patient whose
         name is name. It returns True is the patient is vaccinated and False eoc"""
-        return None
-
+        patient = self.find(name)
+        if patient is None:
+          print("Patient does not exist in the calling health center")
+          return False
+        elif patient.elem.vaccine == 2:
+          print("{} has already received two vaccines" .format(patient.elem.name))
+          self.remove(name)
+          vaccinated.insert(name, patient.elem)
+          return False
+        elif patient.elem.vaccine == 1:
+          patient.elem.vaccine = 2
+          self.remove(name)
+          vaccinated.insert(name, patient.elem)
+          return True
+        else:
+          #IMPOIRTANT: Clarify if the patient can recieve both doses at once
+          patient.elem.vaccine = 1
+          return True
 
     def makeAppointment(self,name,time,schedule):
         """This functions makes an appointment 
