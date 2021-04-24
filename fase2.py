@@ -156,17 +156,18 @@ class HealthCenter2(BinarySearchTree):
         name is name. It returns True is the patient is vaccinated and False eoc"""
         patient = self.find(name)
         if patient is None:
-          print("Patient does not exist in the calling health center")
+          print("{} does not exist in the calling health center".format(name))
           return False
         elif patient.elem.vaccine == 2:
-          print("{} has already received two vaccines" .format(patient.elem.name))
+          print("{} has already received two vaccines" .format(name))
           self.remove(name)
-          vaccinated.insert(name, patient.elem)
+          newPat = Patient(name, patient.elem.year, patient.elem.covid, 2)
+          vaccinated.insert(name, newPat)
           return False
         elif patient.elem.vaccine == 1:
-          patient.elem.vaccine = 2
           self.remove(name)
-          vaccinated.insert(name, patient.elem)
+          newPat = Patient(name, patient.elem.year, patient.elem.covid, 2)
+          vaccinated.insert(name, newPat)
           return True
         else:
           #IMPOIRTANT: Clarify if the patient can recieve both doses at once
@@ -177,7 +178,73 @@ class HealthCenter2(BinarySearchTree):
         """This functions makes an appointment 
         for the patient whose name is name. It functions returns True is the appointment 
         is created and False eoc """
+        patient = self.find(name)
+        if patient is None:
+          print("{} does not exist in the calling health center".format(name))
+          return False
+        elif patient.elem.vaccine == 2:
+          print("{} has already received two vaccines" .format(name))
+          return False
+        else:
+          if checkFormatHour(time) is False:
+            print("Time format is not correct. Format: hh:mm")
+            return False
+          patientHour = schedule.find(time)
+          if patientHour is None:
+            newPat = Patient(name, patient.elem.year, patient.elem.covid, patient.elem.vaccine, appointment = time)
+            schedule.insert(time, newPat)
+            return True
+          else:
+            if schedule.size() == 144:
+              print("{} cannot be appointed for a vaccine since there are no time slots".format(name))
+              return False
+            else:
+                hour = int(time[0:1])
+                minutes = int(time[3:4])
+                if minutes - 5 < 0:
+                    prevTime = "{:02d}:{:02d}".format(hour - 1, 55)
+                else:
+                    prevTime = "{:02d}:{:02d}".format(hour, minutes - 5)
+                if minutes + 5 > 55:
+                    nextTime = "{:02d}:{:02d}".format(hour + 1, 0)
+                else:
+                    nextTime = "{:02d}:{:02d}".format(hour, minutes - 5)
+                
+              while(True):
+                if schedule.find(prevTime) is False:
+                  newPat = Patient(name, patient.elem.year, patient.elem.covid, patient.elem.vaccine, appointment = prevTime)
+                  schedule.insert(prevTime, newPat)
+
+                hour = int(time[0:1])
+                minutes = int(time[3:4])
+                minutes -= 5
+                if minutes == -5:
+                  prevtime = "{:02d}:{:02d}".format(hour - 1, 55)
+                else:
+                  prevtime = "{:02d}:{:02d}".format(hour, minutes)
+
+
+              
+        
         return None
+
+    def inorderlist(self):
+        """returns the inorder (left, root, right)  traversal of the tree as a list"""
+        l = list()
+        self._inorderlist(self._root, l)
+        return l
+
+    def _inorderlist(self,node, l):
+        """prints the inorder (left, root, right) traversal of the subtree
+        than hangs from node"""
+        if node!=None:
+            self._inorderlist(node.left, l)
+            l.append(node.key)
+            self._inorderlist(node.right, l)
+        return l            
+                
+
+
                 
 
 
@@ -187,9 +254,9 @@ if __name__ == '__main__':
     o=HealthCenter2('data/LosFrailes2.tsv')
     o.draw()
     print()
-
-
-    print('Patients who were born in or before than 1990, had covid and did not get any vaccine')
+    l = o.inorderlist()
+    print(str(l))
+    """print('Patients who were born in or before than 1990, had covid and did not get any vaccine')
     result=o.searchPatients(1990, True,0)
     result.draw()
     print()
@@ -209,14 +276,15 @@ if __name__ == '__main__':
     result.draw()
     print()
 
-
+    """
     ###Testing the constructor. Creating a health center where patients are sorted by name
     schedule=HealthCenter2('data/LosFrailesCitas.tsv',False)
     schedule.draw(False)
     print()
+    l2 = schedule.inorderlist()
+    print(str(l2))
     
-    
-
+    """
     o.makeAppointment("Perez","08:00",schedule)
     o.makeAppointment("Losada","19:55",schedule)
     o.makeAppointment("Jaen","16:00",schedule)
@@ -267,4 +335,4 @@ if __name__ == '__main__':
     print('center:')
     o.draw(False)
     print('vaccinated:')
-    vaccinated.draw(False)
+    vaccinated.draw(False)"""

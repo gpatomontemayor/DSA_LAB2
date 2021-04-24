@@ -1,2 +1,2 @@
 language = "python3"
-run = "python3 ./fase2_unitest"
+run = "python3 /home/runner/DSALAB2/fase2_unitest.py"
