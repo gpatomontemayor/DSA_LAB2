@@ -2,10 +2,10 @@
 
 from binarysearchtree import BinarySearchTree
 
-import csv  #read files csv, tsv
-import os.path  #to work with files and directory https://docs.python.org/3/library/os.path.html
-import queue  #package implementes a queueu, https://docs.python.org/3/library/queue.html
-import re  #working with regular expressions
+import csv  # read files csv, tsv
+import os.path  # to work with files and directory https://docs.python.org/3/library/os.path.html
+import queue  # package implementes a queueu, https://docs.python.org/3/library/queue.html
+import re  # working with regular expressions
 
 
 def checkFormatHour(time):
@@ -22,7 +22,7 @@ def checkFormatHour(time):
     return False
 
 
-#number of all possible appointments for one day
+# number of all possible appointments for one day
 NUM_APPOINTMENTS = 144
 
 
@@ -34,7 +34,7 @@ class Patient:
         self.year = year
         self.covid = covid
         self.vaccine = vaccine
-        self.appointment = appointment  #string with format hour:minute
+        self.appointment = appointment  # string with format hour:minute
 
     def setAppointment(self, time):
         """gets a string with format hour:minute"""
@@ -46,64 +46,65 @@ class Patient:
                 self.appointment)
 
     def __eq__(self, other):
-        return other != None and self.name == other.name
+        return other is not None and self.name == other.name
 
 
 class HealthCenter2(BinarySearchTree):
-    """Class to represent a Health Center. This class is a subclass of a binary search tree to 
-    achive a better temporal complexity of its algorithms for 
-    searching, inserting o removing a patient (or an appointment)"""
+    """Class to represent a Health Center. This class is a subclass of a
+    binary search tree to achive a better temporal complexity of its
+    algorithms for searching, inserting o removing a patient (or an
+    appointment)"""
     def __init__(self, filetsv=None, orderByName=True):
         """
-        This constructor allows to create an object instance of HealthCenter2. 
+        This constructor allows to create an object instance of HealthCenter2.
         It takes two parameters:
-        - filetsv: a file csv with the information about the patients whe belong to this health center
-        - orderByName: if it is True, it means that the patients should be sorted by their name in the binary search tree,
-        however, if is is False, it means that the patients should be sorted according their appointments
+        - filetsv: a file csv with the information about the patients whe
+        belong to this health center
+        - orderByName: if it is True, it means that the patients should be
+        sorted by their name in the binary search tree, however, if is is
+        False, it means that the patients should be sorted according
+        their appointments
         """
 
-        #Call to the constructor of the super class, BinarySearchTree.
-        #This constructor only define the root to None
+        # Call to the constructor of the super class, BinarySearchTree.
+        # This constructor only define the root to None
         super(HealthCenter2, self).__init__()
 
-        #Now we
+        # Now we
         if filetsv is None or not os.path.isfile(filetsv):
-            #If the file does not exist, we create an empty tree (health center without patients)
+            # If the file does not exist, we create an empty tree
+            # (health center without patients)
             self.name = ''
-            #print('File does not exist ',filetsv)
+            # print('File does not exist ',filetsv)
         else:
             order = 'by appointment'
             if orderByName:
                 order = 'by name'
 
-            #print('\n\nloading patients from {}. The order is {}\n\n'.format(filetsv,order))
-
             self.name = filetsv[filetsv.rindex('/') + 1:].replace('.tsv', '')
-            #print('The name of the health center is {}\n\n'.format(self.name))
-            #self.name='LosFrailes'
+            # self.name='LosFrailes'
 
             fichero = open(filetsv)
             lines = csv.reader(fichero, delimiter="\t")
 
             for row in lines:
-                #print(row)
-                name = row[0]  #nombre
-                year = int(row[1])  #año nacimiento
+                # print(row)
+                name = row[0]  # nombre
+                year = int(row[1])  # año nacimiento
                 covid = False
-                if int(row[2]) == 1:  #covid:0 o 1
+                if int(row[2]) == 1:  # covid:0 o 1
                     covid = True
-                vaccine = int(row[3])  #número de dosis
+                vaccine = int(row[3])  # número de dosis
                 try:
                     appointment = row[4]
-                    if checkFormatHour(appointment) == False:
-                        #print(appointment, ' is not a right time (hh:minute)')
+                    if not checkFormatHour(appointment):
                         appointment = None
 
                 except:
                     appointment = None
 
                 objPatient = Patient(name, year, covid, vaccine, appointment)
-                #name is the key, and objPatient the eleme
+                # name is the key, and objPatient the eleme
                 if orderByName:
                     self.insert(name, objPatient)
                 else:
@@ -112,16 +113,18 @@ class HealthCenter2(BinarySearchTree):
                     else:
                         print(
                             objPatient,
-                            " was not added because appointment was not valid!!!"
+                            " was not added because appointment was not",
+                            " valid!!!"
                         )
 
             fichero.close()
 
     def searchPatients(self, year=2021, covid=None, vaccine=None):
         """return a new object of type HealthCenter 2 with the patients who
-        satisfy the criteria of the search (parameters). 
-        The function has to visit all patients, so the search must follow a level traverse of the tree.
-        If you use a inorder traverse, the resulting tree should be a list!!!"""
+        satisfy the criteria of the search (parameters).
+        The function has to visit all patients, so the search must follow
+        a level traverse of the tree. If you use a inorder traverse,
+        the resulting tree should be a list!!!"""
 
         # Complexity O(nlogn)
 
@@ -143,19 +146,22 @@ class HealthCenter2(BinarySearchTree):
                     result.insert(current.elem.name,
                                   current.elem)  # log(n) function
                 if current.left is not None:
+                    # enqueue the left element to check in the next iteration
                     q.put(
                         current.left
-                    )  # enqueue the left element to check in the next iteration
+                    )
                 if current.right is not None:
+                    # enqueue the right element to check in the next iteration
                     q.put(
                         current.right
-                    )  # enqueue the right element to check in the next iteration
+                    )
 
         return result
 
     def vaccine(self, name, vaccinated):
         """This functions simulates the vaccination of a patient whose
-        name is name. It returns True is the patient is vaccinated and False eoc"""
+        name is name.
+        It returns True is the patient is vaccinated and False eoc"""
         node = self.find(name)  # save the patient; found by their key (name)
         if node is None:
             print(
@@ -178,18 +184,19 @@ class HealthCenter2(BinarySearchTree):
                 name, newPat)  # so add them to the vaccinated health center
             return True
         else:
-            #IMPOIRTANT: Clarify if the patient can recieve both doses at once
+            # IMPOIRTANT: Clarify if the patient can recieve both doses at once
             node.elem.vaccine = 1
             return True
 
     def makeAppointment(self, name, time, schedule):
-        """This functions makes an appointment 
-        for the patient whose name is name. It functions returns True is the appointment 
-        is created and False eoc """
+        """This functions makes an appointment
+        for the patient whose name is name. It functions returns True
+        is the appointment is created and False eoc """
         # Look for the patient in the calling Health Center
         node = self.find(name)
 
-        # We first check the error cases (no patient and already vaccinated patient)
+        # We first check the error cases (no patient and already
+        # vaccinated patient)
         if node is None:
             print(
                 "{} does not exist in the calling health center".format(name))
@@ -208,21 +215,25 @@ class HealthCenter2(BinarySearchTree):
                 return True
             elif schedule.search(
                     time
-            ) is False:  # The slot is free, so assign it to the patient requesting it
+            ) is False:
+                # The slot is free, so assign it to the patient requesting it
                 node.elem.setAppointment(
                     time)  # Change time in calling health center
                 schedule.insert(time, node.elem)  # Add it to the schedule BST
                 return True
             else:
-                # The total number of possible time slots is 144, we check whether they are all occupied
+                # The total number of possible time slots is 144, we check
+                # whether they are all occupied
                 if schedule.size() == NUM_APPOINTMENTS:
                     print(
-                        "{} cannot be appointed for a vaccine since there are no time slots"
+                        "{} cannot be appointed for a vaccine since there are",
+                        " no time slots"
                         .format(name))
                     return False
                 else:
                     print(
-                        "ALREDAY SOMEONE WITH TIME SLOT {}, LOOKING FOR A BEST FIT"
+                        "ALREDAY SOMEONE WITH TIME SLOT {}, LOOKING FOR A",
+                        "BEST FIT"
                         .format(time))
 
                     # Transform the time variable from string to integer
@@ -231,7 +242,8 @@ class HealthCenter2(BinarySearchTree):
                     hour = int(data[0])
                     minutes = int(data[1])
 
-                    # Boolean variables to control if we have to look before or after
+                    # Boolean variables to control if we have to look
+                    # before or after
                     searchAfter = True
                     searchBefore = True
 
@@ -247,7 +259,8 @@ class HealthCenter2(BinarySearchTree):
                     else:
                         nextTime = "{:02d}:{:02d}".format(hour, minutes + 5)
 
-                    while searchAfter or searchBefore:  # Loop until we get to the extremes #n
+                    # Loop until we get to the extremes #n
+                    while searchAfter or searchBefore:
                         if checkFormatHour(
                                 prevTime
                         ) is False:  # Check if previous time is not 08:00
@@ -259,7 +272,7 @@ class HealthCenter2(BinarySearchTree):
 
                         # First we look if the previous slot is available
                         if searchBefore:
-                            if schedule.search(prevTime) is False:  #log(n)
+                            if schedule.search(prevTime) is False:  # log(n)
                                 node.elem.setAppointment(prevTime)
                                 schedule.insert(
                                     prevTime,
@@ -304,20 +317,23 @@ class HealthCenter2(BinarySearchTree):
 
 if __name__ == '__main__':
 
-    ###Testing the constructor. Creating a health center where patients are sorted by name
+    # Testing the constructor. Creating a health center where patients are
+    # sorted by name
     o = HealthCenter2('data/LosFrailes2.tsv')
     o.draw()
     print()
 
     print(
-        'Patients who were born in or before than 1990, had covid and did not get any vaccine'
+        'Patients who were born in or before than 1990, had covid and did',
+        ' not get any vaccine'
     )
     result = o.searchPatients(1990, True, 0)
     result.draw()
     print()
 
     print(
-        'Patients who were born in or before than 1990, did not have covid and did not get any vaccine'
+        'Patients who were born in or before than 1990, did not have covid',
+        ' and did not get any vaccine'
     )
     result = o.searchPatients(1990, False, 0)
     result.draw()
@@ -333,7 +349,8 @@ if __name__ == '__main__':
     result.draw()
     print()
 
-    ###Testing the constructor. Creating a health center where patients are sorted by name
+    # Testing the constructor. Creating a health center where patients
+    # are sorted by name
     schedule = HealthCenter2('data/LosFrailesCitas.tsv', False)
     schedule.draw()
     print()
@@ -354,7 +371,7 @@ if __name__ == '__main__':
     vaccinated = HealthCenter2('data/vaccinated.tsv')
     vaccinated.draw(False)
 
-    name = 'Ainoza'  #doest no exist
+    name = 'Ainoza'  # doest no exist
     result = o.vaccine(name, vaccinated)
     print("was patient vaccined?:", name, result)
     print('center:')
@@ -362,7 +379,7 @@ if __name__ == '__main__':
     print('vaccinated:')
     vaccinated.draw(False)
 
-    name = 'Abad'  #0 dosages
+    name = 'Abad'  # 0 dosages
     result = o.vaccine(name, vaccinated)
     print("was patient vaccined?:", name, result)
     print('center:')
@@ -370,7 +387,7 @@ if __name__ == '__main__':
     print('vaccinated:')
     vaccinated.draw(False)
 
-    name = 'Font'  #with one dosage
+    name = 'Font'  # with one dosage
     result = o.vaccine(name, vaccinated)
     print("was patient vaccined?:", name, result)
     print('center:')
@@ -378,7 +395,7 @@ if __name__ == '__main__':
     print('vaccinated:')
     vaccinated.draw(False)
 
-    name = 'Omar'  #with two dosage
+    name = 'Omar'  # with two dosage
     result = o.vaccine(name, vaccinated)
     print("was patient vaccined?:", name, result)
     print('center:')
