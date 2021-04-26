@@ -133,6 +133,12 @@ class HealthCenter2(BinarySearchTree):
         if self._root is None:
             print('tree is empty')
         else:
+            # Check if calling tree is ordered by time
+            if checkFormatHour(self._root.key):
+                print(
+                    "Calling tree is ordered by time. It must be by name"
+                    )
+                return result
 
             q = queue.Queue()
             q.put(self._root)  # enqueue: we save the root
@@ -162,6 +168,14 @@ class HealthCenter2(BinarySearchTree):
         """This functions simulates the vaccination of a patient whose
         name is name.
         It returns True is the patient is vaccinated and False eoc"""
+
+        # Check if calling tree is ordered by time
+        if checkFormatHour(self._root.key):
+            print(
+                "Calling tree is ordered by time. It must be by name"
+                )
+            return False
+
         node = self.find(name)  # save the patient; found by their key (name)
         if node is None:
             print(
@@ -184,18 +198,32 @@ class HealthCenter2(BinarySearchTree):
                 name, newPat)  # so add them to the vaccinated health center
             return True
         else:
-            # IMPOIRTANT: Clarify if the patient can recieve both doses at once
-            node.elem.vaccine = 1
+            node.elem.vaccine = 1  # Update the number of dosages
             return True
 
     def makeAppointment(self, name, time, schedule):
         """This functions makes an appointment
         for the patient whose name is name. It functions returns True
         is the appointment is created and False eoc """
+
+        # Check if calling tree is ordered by time
+        if checkFormatHour(self._root.key):
+            print(
+                "Calling tree is ordered by time. It must be by name"
+                )
+            return False
+
+        # Check if schedule tree is ordered by time
+        if checkFormatHour(schedule._root.key) is False:
+            print(
+                "Schedule tree is ordered by name. It must be by time"
+                )
+            return False
+
         # Look for the patient in the calling Health Center
         node = self.find(name)
 
-        # We first check the error cases (no patient and already
+        # We first check the error cases (no patient or already
         # vaccinated patient)
         if node is None:
             print(
@@ -208,7 +236,7 @@ class HealthCenter2(BinarySearchTree):
             if checkFormatHour(time) is False:  # Check the format (hh:mm)
                 print("Time format is not correct. Format: hh:mm")
                 return False
-            if schedule._root is None:
+            if schedule._root is None:  # Empty tree so add it directly
                 node.elem.setAppointment(
                     time)  # Change time in calling health center
                 schedule.insert(time, node.elem)  # Add it to the schedule BST
@@ -232,47 +260,25 @@ class HealthCenter2(BinarySearchTree):
                     return False
                 else:
                     print(
-                        "ALREDAY SOMEONE WITH TIME SLOT {}, LOOKING FOR A",
-                        "BEST FIT"
+                        "Already someone at {}. Looking for best fit"
                         .format(time))
 
-                    # Transform the time variable from string to integer
-
-                    data = time.split(":")
-                    hour = int(data[0])
-                    minutes = int(data[1])
-
-                    # Boolean variables to control if we have to look
-                    # before or after
-                    searchAfter = True
-                    searchBefore = True
-
                     # Modify the variables to find the previous and next slot
-                    # taking into account the hour and minutes format
+                    # taking into account the hour and minutes format if they
+                    # go over the limits (prevTime < 08:00 or nextTime > 19:55)
+                    # it will return None.
 
-                    if (minutes - 5) < 0:
-                        prevTime = "{:02d}:{:02d}".format(hour - 1, 55)
-                    else:
-                        prevTime = "{:02d}:{:02d}".format(hour, minutes - 5)
-                    if (minutes + 5) > 55:
-                        nextTime = "{:02d}:{:02d}".format(hour + 1, 0)
-                    else:
-                        nextTime = "{:02d}:{:02d}".format(hour, minutes + 5)
+                    prevTime = prevSlot(time)
+                    nextTime = nextSlot(time)
 
-                    # Loop until we get to the extremes #n
-                    while searchAfter or searchBefore:
-                        if checkFormatHour(
-                                prevTime
-                        ) is False:  # Check if previous time is not 08:00
-                            searchBefore = False
-                        if checkFormatHour(
-                                nextTime
-                        ) is False:  # Check if next time is not 20:00
-                            searchAfter = False
+                    # Loop until we get to the extremes O(n)
+                    while prevTime or nextTime:
 
                         # First we look if the previous slot is available
-                        if searchBefore:
+                        if prevTime:
                             if schedule.search(prevTime) is False:  # log(n)
+                                # If the time cannot be found, the previous
+                                # time is assigned for this patient
                                 node.elem.setAppointment(prevTime)
                                 schedule.insert(
                                     prevTime,
@@ -282,19 +288,14 @@ class HealthCenter2(BinarySearchTree):
                                         name, prevTime))
                                 return True
                             else:
-                                # Update to seek the previous time slot
-                                data = prevTime.split(":")
-                                hour = int(data[0])
-                                minutes = int(data[1])
-                                if (minutes - 5) < 0:
-                                    prevTime = "{:02d}:{:02d}".format(
-                                        hour - 1, 55)
-                                else:
-                                    prevTime = "{:02d}:{:02d}".format(
-                                        hour, minutes - 5)
-                        # Look in the time slot afterwards
-                        if searchAfter:
+                                # Modify to get the previous time slot
+                                prevTime = prevSlot(prevTime)
+
+                        # Look if the afterwards slot is available
+                        if nextTime:
                             if schedule.search(nextTime) is False:
+                                # If the time cannot be found, this next time
+                                # is assigned for this patient
                                 node.elem.setAppointment(nextTime)
                                 schedule.insert(
                                     nextTime,
@@ -304,15 +305,49 @@ class HealthCenter2(BinarySearchTree):
                                         name, nextTime))
                                 return True
                             else:
-                                data = nextTime.split(":")
-                                hour = int(data[0])
-                                minutes = int(data[1])
-                                if (minutes + 5) > 55:
-                                    nextTime = "{:02d}:{:02d}".format(
-                                        hour + 1, 0)
-                                else:
-                                    nextTime = "{:02d}:{:02d}".format(
-                                        hour, minutes + 5)
+                                # Modify to get the next time slot
+                                nextTime = nextSlot(nextTime)
+
+                        # The end of the loop will never be reached since it's
+                        # checked before whether or not the tree is full
+
+
+def prevSlot(time):
+    """Method to compute the previous time slot. If getting out of range
+    (before 08:00), returns None"""
+    # Split the inputed data into hour and minutes
+    data = time.split(":")
+    hour = int(data[0])
+    minutes = int(data[1]) - 5  # Update minutes
+
+    if minutes < 0:  # We have to substract one hour
+        prevTime = "{:02d}:{:02d}".format(hour - 1, 55)
+    else:
+        prevTime = "{:02d}:{:02d}".format(hour, minutes)
+
+    if checkFormatHour(prevTime):  # Check if time is in the range
+        return prevTime
+    else:
+        return None
+
+
+def nextSlot(time):
+    """Method to compute the previous time slot. If getting out of range
+    (before 08:00), returns None"""
+    # Split the inputed data into hour and minutes
+    data = time.split(":")
+    hour = int(data[0])
+    minutes = int(data[1]) + 5  # Update minutes
+
+    if minutes > 55:  # We have to add one hour
+        nextTime = "{:02d}:{:02d}".format(hour + 1, 0)
+    else:
+        nextTime = "{:02d}:{:02d}".format(hour, minutes)
+
+    if checkFormatHour(nextTime):  # Check if in range
+        return nextTime
+    else:
+        return None
 
 
 if __name__ == '__main__':
