@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
+from binarytree import BinaryTree
 from binarysearchtree import BinarySearchTree
+from Queue import Queue
 
 import csv  # read files csv, tsv
 import os.path  # to work with files and directory https://docs.python.org/3/library/os.path.html
@@ -140,11 +142,11 @@ class HealthCenter2(BinarySearchTree):
                     )
                 return result
 
-            q = queue.Queue()
-            q.put(self._root)  # enqueue: we save the root
+            q = Queue()
+            q.enqueue(self._root)  # enqueue: we save the root
 
-            while not (q.empty()):  # n
-                current = q.get()  # dequeue
+            while not (q.isEmpty()):  # n
+                current = q.dequeue()  # dequeue
                 if current.elem.year <= year and (
                         current.elem.covid == covid
                         or covid is None) and (current.elem.vaccine == vaccine
@@ -153,12 +155,12 @@ class HealthCenter2(BinarySearchTree):
                                   current.elem)  # log(n) function
                 if current.left is not None:
                     # enqueue the left element to check in the next iteration
-                    q.put(
+                    q.enqueue(
                         current.left
                     )
                 if current.right is not None:
                     # enqueue the right element to check in the next iteration
-                    q.put(
+                    q.enqueue(
                         current.right
                     )
 
