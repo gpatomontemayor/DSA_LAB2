@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-from binarytree import BinaryTree
-from binarysearchtree import BinarySearchTree
-from Queue import Queue
+from binarytree import BinaryTree, Node
+from binarysearchtree import BSTNode, BinarySearchTree
 
 import csv  # read files csv, tsv
 import os.path  # to work with files and directory https://docs.python.org/3/library/os.path.html
@@ -128,7 +127,10 @@ class HealthCenter2(BinarySearchTree):
         a level traverse of the tree. If you use a inorder traverse,
         the resulting tree should be a list!!!"""
 
-        # Complexity O(nlogn)
+        # Complexity O(nlogn).
+        # Best case: tree is empty or calling tree is not ordered by name. 
+        # Worst case: no worst case. We have to traverse all the tree in 
+        # any other case.
 
         result = HealthCenter2()
 
@@ -142,27 +144,29 @@ class HealthCenter2(BinarySearchTree):
                     )
                 return result
 
-            q = Queue()
-            q.enqueue(self._root)  # enqueue: we save the root
+            trav = BinaryTree()  # Binary tree used as a list
+            trav._root = Node(self._root)  # Add the root to list-tree
+            next_trav = trav._root  # Next element to retrieve from list-tree
+            last_trav = trav._root  # Last element of the list-tree
 
-            while not (q.isEmpty()):  # n
-                current = q.dequeue()  # dequeue
+            while next_trav is not None:  # O(n). Traverse the tree-list
+                current = next_trav.elem  # Get the next element of the tree-list
                 if current.elem.year <= year and (
                         current.elem.covid == covid
                         or covid is None) and (current.elem.vaccine == vaccine
                                                or vaccine is None):
+                    # If it satisfies the requirements, add to the end
                     result.insert(current.elem.name,
                                   current.elem)  # log(n) function
                 if current.left is not None:
-                    # enqueue the left element to check in the next iteration
-                    q.enqueue(
-                        current.left
-                    )
+                    # Add to the end of the tree-list to check afterwards
+                    last_trav.right = Node(current.left, parent = last_trav)
+                    last_trav = last_trav.right  # Update last element of the tree-list
                 if current.right is not None:
-                    # enqueue the right element to check in the next iteration
-                    q.enqueue(
-                        current.right
-                    )
+                    # Add to the end of the tree-list to check afterwards
+                    last_trav.right = Node(current.right, parent = last_trav)
+                    last_trav = last_trav.right # Update last element of the tree-list
+                next_trav = next_trav.right  # Get next element of the tree-list to check
 
         return result
 
@@ -171,6 +175,13 @@ class HealthCenter2(BinarySearchTree):
         name is name.
         It returns True is the patient is vaccinated and False eoc"""
 
+        # Complexity O(logn). 
+        # Best case: calling tree is empty or is not ordered by name.
+        # Another possibility is that the patient we want to find is the root
+        # and it hasn't received any vaccines.
+        # Worst case: Finding a patient with 1 or more dosages and not being
+        # a leaf for removing it.
+
         # Check if calling tree is ordered by time
         if checkFormatHour(self._root.key):
             print(
@@ -178,23 +189,23 @@ class HealthCenter2(BinarySearchTree):
                 )
             return False
 
-        node = self.find(name)  # save the patient; found by their key (name)
+        node = self.find(name)  # O(logn) look for the patient with key (name)
         if node is None:
             print(
                 "{} does not exist in the calling health center".format(name))
             return False
         elif node.elem.vaccine == 2:
             print("{} has already received two vaccines".format(name))
-            self.remove(
-                name
+            self._remove(
+                node
             )  # patient is fully vaccinated so, eliminate it from HealthCenter
             newPat = Patient(name, node.elem.year, node.elem.covid, 2)
             vaccinated.insert(
                 name, newPat)  # and add it to the vaccinated health center
             return False
         elif node.elem.vaccine == 1:
-            self.remove(
-                name)  # after vaccinated, the patient would have the 2 doses
+            self._remove(
+                node)  # after vaccinated, the patient would have the 2 doses
             newPat = Patient(name, node.elem.year, node.elem.covid, 2)
             vaccinated.insert(
                 name, newPat)  # so add them to the vaccinated health center
@@ -207,6 +218,16 @@ class HealthCenter2(BinarySearchTree):
         """This functions makes an appointment
         for the patient whose name is name. It functions returns True
         is the appointment is created and False eoc """
+
+        # Complexity O(nlogn). 
+        # Best case: calling tree is empty or is not ordered by name,
+        # schedule is ordered by name or inputed time has an invalid format.
+        # Another possibility is that the patient we want to find is the 
+        # root in the calling tree and has already received two vaccines, or
+        # that it hasn't and the schedule tree is empty.
+        # Worst case: Finding a patient with less than the two dosages and
+        # the first available slot is at the beginning or at the end (the
+        # contrary to the inputed time).
 
         # Check if calling tree is ordered by time
         if checkFormatHour(self._root.key):
@@ -221,9 +242,13 @@ class HealthCenter2(BinarySearchTree):
                 "Schedule tree is ordered by name. It must be by time"
                 )
             return False
+        # Check the format of the inputed time (hh:mm)
+        if checkFormatHour(time) is False:  
+                print("Time format is not correct. Format: hh:mm")
+                return False
 
         # Look for the patient in the calling Health Center
-        node = self.find(name)
+        node = self.find(name)  # O(logn)
 
         # We first check the error cases (no patient or already
         # vaccinated patient)
@@ -234,10 +259,7 @@ class HealthCenter2(BinarySearchTree):
         elif node.elem.vaccine == 2:
             print("{} has already received two vaccines".format(name))
             return False
-        else:
-            if checkFormatHour(time) is False:  # Check the format (hh:mm)
-                print("Time format is not correct. Format: hh:mm")
-                return False
+        else: # O(nlogn)
             if schedule._root is None:  # Empty tree so add it directly
                 node.elem.setAppointment(
                     time)  # Change time in calling health center
@@ -254,7 +276,7 @@ class HealthCenter2(BinarySearchTree):
             else:
                 # The total number of possible time slots is 144, we check
                 # whether they are all occupied
-                if schedule.size() == NUM_APPOINTMENTS:
+                if schedule.size() == NUM_APPOINTMENTS: #O(n)
                     print(
                         "{} cannot be appointed for a vaccine since there are",
                         " no time slots"
@@ -278,7 +300,7 @@ class HealthCenter2(BinarySearchTree):
 
                         # First we look if the previous slot is available
                         if prevTime:
-                            if schedule.search(prevTime) is False:  # log(n)
+                            if schedule.search(prevTime) is False:  # O(logn)
                                 # If the time cannot be found, the previous
                                 # time is assigned for this patient
                                 node.elem.setAppointment(prevTime)
@@ -316,7 +338,7 @@ class HealthCenter2(BinarySearchTree):
 
 def prevSlot(time):
     """Method to compute the previous time slot. If getting out of range
-    (before 08:00), returns None"""
+    (before 08:00), returns None O(1)"""
     # Split the inputed data into hour and minutes
     data = time.split(":")
     hour = int(data[0])
@@ -335,7 +357,7 @@ def prevSlot(time):
 
 def nextSlot(time):
     """Method to compute the previous time slot. If getting out of range
-    (before 08:00), returns None"""
+    (before 08:00), returns None. O(1)"""
     # Split the inputed data into hour and minutes
     data = time.split(":")
     hour = int(data[0])
@@ -385,7 +407,7 @@ if __name__ == '__main__':
     result = o.searchPatients(1990, True)
     result.draw()
     print()
-
+    
     # Testing the constructor. Creating a health center where patients
     # are sorted by name
     schedule = HealthCenter2('data/LosFrailesCitas.tsv', False)
